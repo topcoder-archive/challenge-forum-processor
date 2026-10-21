@@ -137,8 +137,7 @@ Run `nvm use` (Node 22.23.2) before installing. `keycloak_m2M` pins shared core
 provider validates issuer/audience/client/scope and caches verified RS256 service
 tokens. There is no Auth0 issuance or proxy fallback. Configure dedicated
 Keycloak settings before rollout. Required API grants include `read:challenges`,
-`update:challenges`, `read:resources`, `read:project`, and the Identity API user/role
-read grants. Rocket.Chat and Vanilla credentials remain independently configured.
+`update:challenges`, `read:resources`, `read:projects`, `read:user`, and `read:roles`. Rocket.Chat and Vanilla credentials remain independently configured.
 
 `npm run lint`, `npm run build` (JavaScript syntax checks), and `npm test`
 exercise the branch without publishing Kafka messages or changing forums.

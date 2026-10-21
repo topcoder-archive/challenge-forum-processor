@@ -1,5 +1,5 @@
 # Use the base image with Node.js
-FROM node:8.12
+FROM node:22.23.2
 
 # Copy the current directory into the Docker image
 COPY . /challenge-forum-processor
@@ -8,7 +8,7 @@ COPY . /challenge-forum-processor
 WORKDIR /challenge-forum-processor
 
 # Install the dependencies from package.json
-RUN npm install
+RUN npm ci
 #RUN npm run build
 #RUN npm run test
 

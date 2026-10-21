@@ -92,11 +92,13 @@ For quick-setup while development, use a `.env` file, and run `docker-compose up
 | ROCKETCHAT_PASSWORD | Rocketchat Password | `rocket` |
 | VANILLA_API_URL | Vanilla v2 API URL | `http://localhost/api/v2` |
 | VANILLA_ADMIN_ACCESS_TOKEN | Vanilla admin personal access token | |
-| TOPCODER_AUTH0_AUDIENCE | Topcoder Auth0 Audience | |
-| TOPCODER_AUTH0_CLIENT_ID | Topcoder Auth0 client ID | |
-| TOPCODER_AUTH0_CLIENT_SECRET | Topcoder Auth0 Client Secret | |
-| TOPCODER_AUTH0_PROXY_SERVER_URL | Topcoder Auth0 Proxy Server URL | `https://auth0proxy.topcoder-dev.com/token` |
-| TOPCODER_AUTH0_URL | Topcoder Auth0 URL | |
+| M2M_PROVIDER | Must be `keycloak` | Required |
+| KEYCLOAK_ISSUER | HTTPS M2M realm issuer | Required |
+| KEYCLOAK_AUDIENCE | Intended API audience | Required |
+| KEYCLOAK_TOKEN_URL | Managed HTTPS token endpoint | Required |
+| KEYCLOAK_CLIENT_ID | Dedicated processor client | Required |
+| KEYCLOAK_CLIENT_SECRET | Dedicated processor secret | Required |
+| KEYCLOAK_SCOPE | Space-separated granted scopes | Optional |
 | TOPCODER_API_URL | Topcoder API URL | `https://api.topcoder-dev.com` |
 | TOPCODER_ROOT_URL | Topcoder Root URL | `https://topcoder-dev.com` |
 
@@ -127,3 +129,17 @@ $ npm run lint:fix
 ```
 
 Commit to force redeploy
+
+## Keycloak migration branch
+
+Run `nvm use` (Node 22.23.2) before installing. `keycloak_m2M` pins shared core
+4.0.0-keycloak.0 at `c262f4aca971904f308085bdeaaed35cdf3cfa7d`. A persistent
+provider validates issuer/audience/client/scope and caches verified RS256 service
+tokens. There is no Auth0 issuance or proxy fallback. Configure dedicated
+Keycloak settings before rollout. Required API grants include `read:challenges`,
+`update:challenges`, `read:resources`, `read:project`, and the Identity API user/role
+read grants. Rocket.Chat and Vanilla credentials remain independently configured.
+
+`npm run lint`, `npm run build` (JavaScript syntax checks), and `npm test`
+exercise the branch without publishing Kafka messages or changing forums.
+CI deploy filters exclude `keycloak_m2M`; existing DEV services remain unchanged.

@@ -3,38 +3,28 @@ const _ = require('lodash')
 const m2mAuth = require('tc-core-library-js').auth.m2m
 const request = require('superagent')
 
-let m2m = null
+const m2m = m2mAuth(config.TOPCODER)
 
-/**
- * Function to get M2M token
+/** Obtain a cached or newly verified Keycloak token for Topcoder API calls.
+ * Takes no arguments; reads explicit KEYCLOAK_* deployment configuration.
+ * @returns {Promise<string>} Verified service token from shared core.
+ * @throws {Error} Sanitized shared-core issuance/validation errors.
  */
 async function getM2MToken () {
-  if (_.isNull(m2m)) {
-    m2m = m2mAuth(
-      _.pick(config.TOPCODER, [
-        'AUTH0_URL',
-        'AUTH0_AUDIENCE',
-        'TOKEN_CACHE_TIME',
-        'AUTH0_PROXY_SERVER_URL'
-      ])
-    )
-  }
-
-  return m2m.getMachineToken(
-    config.TOPCODER.AUTH0_CLIENT_ID,
-    config.TOPCODER.AUTH0_CLIENT_SECRET
-  )
+  return m2m.getMachineToken()
 }
 
 /**
- * Function to send request to V5 API
+ * Send a Topcoder API request with a shared-core verified service credential.
  * @param {String} reqType Type of the request POST / PATCH / PUT / GET / DELETE / HEAD
  * @param {String} path Complete path of the API URL
  * @param {Object} reqBody Body of the request
+ * @returns {Promise<Object>} API response.
+ * @throws {Error} Invalid method, sanitized auth error, or downstream transport error.
  */
 async function reqToAPI (reqType, path, reqBody) {
   const token = await getM2MToken()
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {}
+  const authHeader = { Authorization: `Bearer ${token}` }
 
   const validReqTypes = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE']
   const hasBody = ['POST', 'PUT', 'PATCH']

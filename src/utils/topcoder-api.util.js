@@ -3,19 +3,24 @@ const _ = require('lodash')
 const m2mAuth = require('tc-core-library-js').auth.m2m
 const request = require('superagent')
 
+// Token provider chosen by USE_KEYCLOAK in config.TOPCODER: Keycloak (KEYCLOAK_*)
+// when true, otherwise Auth0 (AUTH0_URL, AUTH0_AUDIENCE, AUTH0_PROXY_SERVER_URL).
 const m2m = m2mAuth(config.TOPCODER)
 
-/** Obtain a cached or newly verified Keycloak token for Topcoder API calls.
- * Takes no arguments; reads explicit KEYCLOAK_* deployment configuration.
- * @returns {Promise<string>} Verified service token from shared core.
- * @throws {Error} Sanitized shared-core issuance/validation errors.
+/** Obtain a cached or new M2M token for Topcoder API calls from the active provider.
+ * Takes no arguments. With USE_KEYCLOAK=true the token is a verified Keycloak token
+ * for KEYCLOAK_CLIENT_ID/KEYCLOAK_CLIENT_SECRET; otherwise it is an Auth0 token for
+ * AUTH0_CLIENT_ID/AUTH0_CLIENT_SECRET. Used by reqToAPI for every Topcoder request.
+ * @returns {Promise<string>} Bearer token from shared core.
+ * @throws {Error} Sanitized shared-core issuance/validation errors, including
+ * missing credentials for the active provider.
  */
 async function getM2MToken () {
   return m2m.getMachineToken()
 }
 
 /**
- * Send a Topcoder API request with a shared-core verified service credential.
+ * Send a Topcoder API request with the active provider's M2M token (see getM2MToken).
  * @param {String} reqType Type of the request POST / PATCH / PUT / GET / DELETE / HEAD
  * @param {String} path Complete path of the API URL
  * @param {Object} reqBody Body of the request

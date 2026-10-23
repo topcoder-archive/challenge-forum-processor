@@ -92,13 +92,18 @@ For quick-setup while development, use a `.env` file, and run `docker-compose up
 | ROCKETCHAT_PASSWORD | Rocketchat Password | `rocket` |
 | VANILLA_API_URL | Vanilla v2 API URL | `http://localhost/api/v2` |
 | VANILLA_ADMIN_ACCESS_TOKEN | Vanilla admin personal access token | |
-| M2M_PROVIDER | Must be `keycloak` | Required |
-| KEYCLOAK_ISSUER | HTTPS M2M realm issuer | Required |
-| KEYCLOAK_AUDIENCE | Intended API audience | Required |
-| KEYCLOAK_TOKEN_URL | Managed HTTPS token endpoint | Required |
-| KEYCLOAK_CLIENT_ID | Dedicated processor client | Required |
-| KEYCLOAK_CLIENT_SECRET | Dedicated processor secret | Required |
-| KEYCLOAK_SCOPE | Space-separated granted scopes | Optional |
+| USE_KEYCLOAK | `true` gets M2M tokens from Keycloak; unset or `false` uses Auth0 | Auth0 |
+| AUTH0_URL | Auth0 token URL (when `USE_KEYCLOAK` is not `true`) | |
+| AUTH0_AUDIENCE | Auth0 audience (when `USE_KEYCLOAK` is not `true`) | |
+| AUTH0_PROXY_SERVER_URL | Auth0 proxy that receives the token request | `AUTH0_URL` |
+| AUTH0_CLIENT_ID | Auth0 client ID (when `USE_KEYCLOAK` is not `true`) | |
+| AUTH0_CLIENT_SECRET | Auth0 client secret (when `USE_KEYCLOAK` is not `true`) | |
+| KEYCLOAK_ISSUER | HTTPS M2M realm issuer | Required when `USE_KEYCLOAK=true` |
+| KEYCLOAK_AUDIENCE | Intended API audience | Required when `USE_KEYCLOAK=true` |
+| KEYCLOAK_TOKEN_URL | Managed HTTPS token endpoint | Required when `USE_KEYCLOAK=true` |
+| KEYCLOAK_CLIENT_ID | Dedicated processor client | Required when `USE_KEYCLOAK=true` |
+| KEYCLOAK_CLIENT_SECRET | Dedicated processor secret | Required when `USE_KEYCLOAK=true` |
+| KEYCLOAK_SCOPE | Space-separated granted scopes (Keycloak only) | Optional |
 | TOPCODER_API_URL | Topcoder API URL | `https://api.topcoder-dev.com` |
 | TOPCODER_ROOT_URL | Topcoder Root URL | `https://topcoder-dev.com` |
 
@@ -133,11 +138,36 @@ Commit to force redeploy
 ## Keycloak migration branch
 
 Run `nvm use` (Node 22.23.2) before installing. `keycloak_m2M` pins shared core
-4.0.0-keycloak.0 at `c262f4aca971904f308085bdeaaed35cdf3cfa7d`. A persistent
-provider validates issuer/audience/client/scope and caches verified RS256 service
-tokens. There is no Auth0 issuance or proxy fallback. Configure dedicated
-Keycloak settings before rollout. Required API grants include `read:challenges`,
-`update:challenges`, `read:resources`, `read:projects`, `read:user`, and `read:roles`. Rocket.Chat and Vanilla credentials remain independently configured.
+4.0.0-keycloak.1 at `e844764e1c2cadcc01fd5e05029590319802af09`.
+
+### Provider switch: `USE_KEYCLOAK`
+
+`USE_KEYCLOAK=true` makes the processor get its Topcoder API M2M tokens from
+Keycloak, using `KEYCLOAK_TOKEN_URL`, `KEYCLOAK_AUDIENCE`, `KEYCLOAK_CLIENT_ID` and
+`KEYCLOAK_CLIENT_SECRET` (optional `KEYCLOAK_SCOPE` narrows the client's defaults).
+`KEYCLOAK_ISSUER` is also required. A persistent provider validates
+issuer/audience/client/scope and caches verified RS256 service tokens. Required
+API grants include `read:challenges`, `update:challenges`, `read:resources`,
+`read:projects`, `read:user`, and `read:roles`.
+
+Unset or `false` restores the Auth0 behaviour from before the migration: tokens
+come from `AUTH0_PROXY_SERVER_URL` (default `AUTH0_URL`) with `AUTH0_URL`,
+`AUTH0_AUDIENCE`, `AUTH0_CLIENT_ID` and `AUTH0_CLIENT_SECRET`. Earlier versions of
+this README listed these as `TOPCODER_AUTH0_*`, but the code reads the
+`AUTH0_*` names.
+
+`tc-core-library-js` reads the flag (`auth.useKeycloak`) from `config.TOPCODER`,
+which `src/utils/topcoder-api.util.js` passes to `auth.m2m`, so the processor and
+the core always agree. Any value other than `true`/`false` fails at startup. In DEV
+the flag is `/config/common/global-appvar/USE_KEYCLOAK`; the CircleCI deploy loads
+`/config/challenge-forum-processor/appvar` and `/config/common/global-appvar`.
+
+**Rollback:** set `USE_KEYCLOAK=false` and force a new deployment so tasks re-read
+SSM. No code or dependency change is needed. Keep the Auth0 settings above in SSM
+until Keycloak has been accepted. The core never retries a failed Keycloak request
+against Auth0; rolling back is always this explicit change.
+
+Rocket.Chat and Vanilla credentials remain independently configured.
 
 `npm run lint`, `npm run build` (JavaScript syntax checks), and `npm test`
 exercise the branch without publishing Kafka messages or changing forums.

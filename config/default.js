@@ -38,8 +38,16 @@ module.exports = {
     API_URL: process.env.VANILLA_API_URL || "http://localhost/api/v2",
     ADMIN_ACCESS_TOKEN: process.env.VANILLA_ADMIN_ACCESS_TOKEN,
   },
+  // Passed whole to tc-core-library-js auth.m2m. USE_KEYCLOAK=true requests tokens
+  // with the KEYCLOAK_* settings; unset or "false" uses the AUTH0_* settings, as
+  // before the Keycloak migration. Each provider ignores the other's settings.
   TOPCODER: {
-    M2M_PROVIDER: process.env.M2M_PROVIDER,
+    USE_KEYCLOAK: process.env.USE_KEYCLOAK,
+    AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE,
+    AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+    AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
+    AUTH0_PROXY_SERVER_URL: process.env.AUTH0_PROXY_SERVER_URL,
+    AUTH0_URL: process.env.AUTH0_URL,
     KEYCLOAK_ISSUER: process.env.KEYCLOAK_ISSUER,
     KEYCLOAK_AUDIENCE: process.env.KEYCLOAK_AUDIENCE,
     KEYCLOAK_TOKEN_URL: process.env.KEYCLOAK_TOKEN_URL,

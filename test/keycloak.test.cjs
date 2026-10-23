@@ -4,8 +4,11 @@ const { test } = require('node:test');
 const nock = require('nock');
 const issuer = 'https://forum-worker.test/realms/m2m';
 const clientId = 'forum-worker';
+// USE_KEYCLOAK=true: the Auth0 settings below must be ignored (net connect is disabled).
 Object.assign(process.env, {
-  M2M_PROVIDER: 'keycloak', KEYCLOAK_ISSUER: issuer, KEYCLOAK_AUDIENCE: 'https://api.test',
+  AUTH0_URL: 'https://tenant.test/oauth/token', AUTH0_PROXY_SERVER_URL: 'https://proxy.test/token',
+  AUTH0_AUDIENCE: 'https://m2m.test/', AUTH0_CLIENT_ID: 'auth0-forum', AUTH0_CLIENT_SECRET: 'auth0-secret',
+  USE_KEYCLOAK: 'true', KEYCLOAK_ISSUER: issuer, KEYCLOAK_AUDIENCE: 'https://api.test',
   KEYCLOAK_TOKEN_URL: 'https://forum-worker.test/m2m/token', KEYCLOAK_CLIENT_ID: clientId,
   KEYCLOAK_CLIENT_SECRET: 'synthetic-secret', KEYCLOAK_SCOPE: 'read:challenges',
 });

@@ -11,7 +11,7 @@
     "cleanData": "node scripts/cleanData.js",
     "lint": "standard \"src/**/*.js\" \"scripts/**/*.js\"",
     "lint:fix": "standard --fix \"src/**/*.js\" \"scripts/**/*.js\"",
-    "test": "node --test test/keycloak.test.cjs",
+    "test": "node --test test/keycloak.test.cjs test/provider.test.cjs",
     "build": "node scripts/build.cjs"
   },
   "repository": {
@@ -34,7 +34,7 @@
     "rocketchat-api": "github:dhruvit-r/rocketchat-api-node",
     "r7insight_node": "^1.8.4",
     "superagent": "^5.1.1",
-    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/c262f4aca971904f308085bdeaaed35cdf3cfa7d",
+    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/e844764e1c2cadcc01fd5e05029590319802af09",
     "winston": "^3.2.1",
     "winston-timestamp-colorize": "^1.0.4"
   },

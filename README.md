@@ -138,7 +138,7 @@ Commit to force redeploy
 ## Keycloak migration branch
 
 Run `nvm use` (Node 22.23.2) before installing. `keycloak_m2M` pins shared core
-4.0.0-keycloak.1 at `e844764e1c2cadcc01fd5e05029590319802af09`.
+4.0.0-keycloak.2 at `112d54a3ed66423e7305e94e174937823e76124e`.
 
 ### Provider switch: `USE_KEYCLOAK`
 
